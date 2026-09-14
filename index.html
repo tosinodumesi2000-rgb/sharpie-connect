@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharpie Connect</title>
+    <style>
+        /* Modern Dark UI styling optimized for Telegram mobile screens */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f111a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* 1. App-Open Splash Ad Overlay Grid Container */
+        #splash-ad {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #050508;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .ad-timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* Main Core Container */
+        .app-container {
+            padding: 20px;
+            padding-bottom: 90px;
+        }
+
+        /* 2. Mining Dashboard Panel Details */
+        .mining-card {
+            background: linear-gradient(135deg, #1e1e2f 0%, #252538 100%);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        .coin-counter {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffcc00;
+            margin: 15px 0;
+        }
+        .btn-boost {
+            background: linear-gradient(90deg, #ff007f 0%, #7f00ff 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        /* 3. Sticky Bottom Mobile Ad Space Allocation */
+        .banner-ad-container {
+            background-color: #1a1c24;
+            border: 1px dashed #3a3f58;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: #7a7f9d;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        /* Main Navigation Tab Layout Bar */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #161824;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 1px solid #23263a;
+        }
+        .nav-item {
+            color: #8f94a6;
+            text-decoration: none;
+            font-size: 12px;
+            text-align: center;
+        }
+        .nav-item.active {
+            color: #ff007f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. The 3-Second App-Open Splash Ad Element -->
+    <div id="splash-ad">
+        <div class="ad-timer" id="timer-text">Ad closing in 3s...</div>
+        <h3 style="color: #ff007f;">🔥 SPONSOR FEATURE</h3>
+        <p style="color: #8f94a6; text-align: center; padding: 0 20px;">Premium Crypto Exchange & Token Drops Launching Globally!</p>
+    </div>
+
+    <!-- Main Live App Interface Body Display Container -->
+    <div class="app-container">
+        <h2>Sharpie Connect</h2>
+        <p style="color: #8f94a6;">Global Matchmaking & Rewards Hub</p>
+
+        <!-- 2. Mining Element Framework -->
+        <div class="mining-card">
+            <h3>⚡ Pornstar Coin Mining Hub</h3>
+            <div class="coin-counter" id="coin-display">0.00 $PSC</div>
+            <button class="btn-boost" onclick="triggerRewardedAd()">🔋 BOOST SPEED (+50%)</button>
+        </div>
+
+        <!-- 3. Dynamic Static Inline Banner Space Holder -->
+        <div class="banner-ad-container">
+            [ Sponsored Crypto Banner Ad Display Container Area ]
+        </div>
+    </div>
+
+    <!-- Bottom App Navigation Control Grid Bar -->
+    <nav class="nav-bar">
+        <a href="#" class="nav-item">👥 Discover</a>
+        <a href="#" class="nav-item active">⚡ Mine</a>
+        <a href="#" class="nav-item">💬 Chats</a>
+        <a href="#" class="nav-item">👤 Profile</a>
+    </nav>
+
+    <script>
+        // Javascript control logic for handling automatic timing displays
+        let coinCount = 0.00;
+        
+        // 1. Core Splash Screen Ad Auto-Dismissal Timer Engine Configuration
+        setTimeout(() => {
+            document.getElementById('splash-ad').style.display = 'none';
+        }, 3000);
+
+        let timeLeft = 3;
+        const countdown = setInterval(() => {
+            timeLeft--;
+            if(timeLeft <= 0) {
+                clearInterval(countdown);
+            } else {
+                document.getElementById('timer-text').innerText = `Ad closing in ${timeLeft}s...`;
+            }
+        }, 1000);
+
+        // 2. Incremental Background Processing Loop simulation for Counter tracking
+        setInterval(() => {
+            coinCount += 0.04;
+            document.getElementById('coin-display').innerText = coinCount.toFixed(2) + " $PSC";
+        }, 1000);
+
+        // 3. User Trigger System Mockup simulation for Rewarded Video Event hooks
+        function triggerRewardedAd() {
+            alert("Loading high-paying crypto video ad... After 15 seconds, mining speed doubles!");
+        }
+    </script>
+</body>
+</html>
