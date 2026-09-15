@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sharpie Connect</title>
+    <!-- ⚠️ THIS UNLOCKS TELEGRAM SCRIPT PERMISSIONS AND FIXES THE FREEZE -->
+    <script src="https://telegram.org"></script>
     <style>
         body {
             margin: 0;
@@ -12,6 +14,8 @@
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow-x: hidden;
+            -webkit-user-select: none;
+            user-select: none;
         }
         #splash-ad {
             position: fixed;
@@ -39,12 +43,8 @@
             padding: 20px;
             padding-bottom: 90px;
         }
-        
-        /* App View Navigation Sections */
         .app-view { display: none; }
         .app-view.active { display: block; }
-
-        /* Dashboard Presentation Cards */
         .dashboard-card {
             background: linear-gradient(135deg, #1e1e2f 0%, #252538 100%);
             border-radius: 16px;
@@ -72,14 +72,6 @@
             box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
             margin-top: 10px;
         }
-        .btn-action:disabled {
-            background: #2e3040;
-            color: #5a5d7a;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        
-        /* Escrow Layout Elements */
         .profile-box {
             border: 1px solid #3a3f58;
             border-radius: 12px;
@@ -107,7 +99,6 @@
         }
         .btn-confirm { background: #00e676; color: black; }
         .btn-cancel { background: #ff1744; color: white; }
-
         .banner-ad-container {
             background-color: #1a1c24;
             border: 1px dashed #3a3f58;
@@ -120,8 +111,6 @@
             margin-bottom: 20px;
             border-radius: 8px;
         }
-        
-        /* Tab Navigation Bar Layout */
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -151,7 +140,6 @@
 </head>
 <body>
 
-    <!-- Dynamic Splash Ad Overlay -->
     <div id="splash-ad">
         <div class="ad-timer" id="timer-text">Ad closing in 3s...</div>
         <h3 style="color: #ff007f;">🔥 SPONSOR FEATURE</h3>
@@ -173,10 +161,7 @@
                     <p style="font-size: 12px; color: #8f94a6; text-align: center; margin-bottom: 15px;">Online Now • Camera Active</p>
                     
                     <div id="escrow-state-box" style="text-align: center;">
-                        <!-- Option 1: Physical Meetup booking -->
                         <button class="btn-action" onclick="simulateBooking('Physical Meetup', 500)">🔒 BOOK PHYSICAL MEETUP (500 Stars)</button>
-                        
-                        <!-- Option 2: Sex Video Chat secure booking -->
                         <button class="btn-action" style="background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);" onclick="simulateBooking('Sex Video Chat (SVC)', 300)">📱 BOOK SECURE VIDEO CALL (300 Stars)</button>
                     </div>
                 </div>
@@ -203,13 +188,11 @@
             </div>
         </div>
 
-        <!-- Static Banner Placeholder Space Area -->
         <div class="banner-ad-container">
             [ Sponsored Crypto Banner Ad Display Container Area ]
         </div>
     </div>
 
-    <!-- App Navigation Controls -->
     <nav class="nav-bar">
         <button class="nav-item active" onclick="switchView('view-discover', this)">👥 Discover</button>
         <button class="nav-item" onclick="switchView('view-mine', this)">⚡ Mine</button>
@@ -217,6 +200,10 @@
     </nav>
 
     <script>
+        // Tell Telegram the webapp is ready to unlock script tracking
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand(); // Make it full screen automatically
+
         let coinCount = 0.00;
         let userWallet = 1000; 
         let escrowBalance = 0;
@@ -231,12 +218,16 @@
             element.classList.add('active');
         }
 
-        setTimeout(() => { document.getElementById('splash-ad').style.display = 'none'; }, 3000);
+        // Timer starts executing cleanly now
         let timeLeft = 3;
         const countdown = setInterval(() => {
             timeLeft--;
-            if(timeLeft <= 0) clearInterval(countdown);
-            else document.getElementById('timer-text').innerText = `Ad closing in ${timeLeft}s...`;
+            if(timeLeft <= 0) {
+                clearInterval(countdown);
+                document.getElementById('splash-ad').style.display = 'none';
+            } else {
+                document.getElementById('timer-text').innerText = `Ad closing in ${timeLeft}s...`;
+            }
         }, 1000);
 
         function startMiningSession() {
@@ -262,5 +253,9 @@
             }, 15000); 
         }
 
-        // --- DUAL MODE ESCROW TRANSACTION LOGIC ---
+        function simulateBooking(type, cost) {
+            if (userWallet < cost) {
+                alert("Insufficient Stars balance inside your account dashboard!");
+                return;
+            }
         
