@@ -220,16 +220,15 @@
             element.classList.add('active');
         }
 
-        // Dismiss splash ad automatically after countdown
+        // Automatic Splash Screen Close Logic
         let timeLeft = 3;
         const countdown = setInterval(() => {
             timeLeft--;
-            const timerElement = document.getElementById('timer-text');
             if (timeLeft <= 0) {
                 clearInterval(countdown);
                 document.getElementById('splash-ad').style.display = 'none';
-            } else if (timerElement) {
-                timerElement.innerText = `Ad closing in ${timeLeft}s...`;
+            } else {
+                document.getElementById('timer-text').innerText = `Ad closing in ${timeLeft}s...`;
             }
         }, 1000);
 
@@ -261,44 +260,5 @@
                 alert("Insufficient Stars balance inside your account dashboard!");
                 return;
             }
-
-            userWallet -= cost;
-            escrowBalance += cost;
             activeBookingType = type;
-
-            document.getElementById('wallet-display').innerText = userWallet + " Stars";
-            document.getElementById('escrow-display').innerText = escrowBalance + " Stars";
-
-            const escrowBox = document.getElementById('escrow-state-box');
-            escrowBox.innerHTML = `
-                <div class="escrow-status-tag">🔒 ESCROW ACTIVE: ${cost} STARS LOCKED</div>
-                <p style="font-size: 12px; color: #8f94a6;">Booking: <b>${type}</b></p>
-                <div class="escrow-actions">
-                    <button class="btn-action btn-confirm" onclick="resolveBooking(true, ${cost})">Release Funds</button>
-                    <button class="btn-action btn-cancel" onclick="resolveBooking(false, ${cost})">Cancel & Refund</button>
-                </div>
-            `;
-        }
-
-        function resolveBooking(completed, amount) {
-            if (completed) {
-                escrowBalance -= amount;
-                alert(`Transaction completed! ${amount} Stars released to provider.`);
-            } else {
-                userWallet += amount;
-                escrowBalance -= amount;
-                alert(`Booking cancelled! ${amount} Stars refunded to your wallet.`);
-            }
-
-            document.getElementById('wallet-display').innerText = userWallet + " Stars";
-            document.getElementById('escrow-display').innerText = escrowBalance + " Stars";
-
-            const escrowBox = document.getElementById('escrow-state-box');
-            escrowBox.innerHTML = `
-                <button class="btn-action" onclick="simulateBooking('Physical Meetup', 500)">🔒 BOOK PHYSICAL MEETUP (500 Stars)</button>
-                <button class="btn-action" style="background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);" onclick="simulateBooking('Sex Video Chat (SVC)', 300)">📱 BOOK SECURE VIDEO CALL (300 Stars)</button>
-            `;
-        }
-    </script>
-</body>
-</html>
+        
