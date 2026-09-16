@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sharpie Connect</title>
     <!-- Official Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- ADSGRAM INTEGRATION SDK -->
-    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <script src="https://telegram.org"></script>
+    <!-- ADSGRAM INTEGRATION -->
+    <script src="https://adsgram.ai"></script>
     <style>
         body {
             margin: 0;
@@ -56,13 +56,6 @@
             background: #0088cc;
             color: white;
             margin-top: 5px;
-            text-decoration: none;
-            display: block;
-            text-align: center;
-            line-height: 40px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 14px;
         }
         .btn-action:disabled {
             background: #2e3040;
@@ -83,6 +76,26 @@
             background: rgba(0,0,0,0.2);
             text-align: left;
         }
+        .escrow-status-tag {
+            background: #ffcc00;
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+            text-align: center;
+            width: 90%;
+        }
+        .escrow-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn-confirm { background: #00e676; color: black; }
+        .btn-cancel { background: #ff1744; color: white; }
+        
         .banner-ad-container {
             background-color: #1a1c24;
             border: 1px dashed #3a3f58;
@@ -97,6 +110,7 @@
             border-radius: 8px;
             cursor: pointer;
         }
+        
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -135,7 +149,6 @@
             <div class="dashboard-card">
                 <h3>👥 Active Escrow Protection Grid</h3>
                 <p style="color: #8f94a6; font-size: 13px;">Funds are 100% safely held by the app escrow system. Tap chat to negotiate first, then lock stars to secure the link!</p>
-                
                 <div class="profile-grid" id="providers-container">
                     <p style="text-align: center; color: #8f94a6;">Loading active profiles from database...</p>
                 </div>
@@ -161,10 +174,10 @@
                 <p style="font-size: 12px; color: #8f94a6;">Locked in Secure Escrow: <span id="escrow-display" style="color: #ffcc00; font-weight: bold;">0 Stars</span></p>
                 
                 <div style="border-top: 1px solid #23263a; margin-top: 20px; padding-top: 15px;">
-                    <h4>💳 Deposit Telegram Stars Instantly</h4>
-                    <p style="font-size: 12px; color: #8f94a6; margin-bottom: 15px;">Funds process cleanly via secure app payment windows.</p>
-                    <button class="btn-action" style="background: #ffcc00; color: #000;" onclick="initializeStarsDeposit(250)">➕ BUY 250 STARS</button>
-                    <button class="btn-action" style="background: #ffcc00; color: #000;" onclick="initializeStarsDeposit(500)">➕ BUY 500 STARS</button>
+                    <h4>💳 Sandbox Deposit Interface</h4>
+                    <p style="font-size: 12px; color: #8f94a6; margin-bottom: 15px;">Testing instant wallet crediting without API breakdown triggers.</p>
+                    <button class="btn-action" style="background: #ffcc00; color: #000;" onclick="initializeStarsDeposit(250)">➕ CREDIT 250 STARS (TEST)</button>
+                    <button class="btn-action" style="background: #ffcc00; color: #000;" onclick="initializeStarsDeposit(500)">➕ CREDIT 500 STARS (TEST)</button>
                 </div>
             </div>
         </div>
@@ -194,7 +207,7 @@
             }
         }
 
-        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "48172" }) : null;
+        const AdController = window.Adsgram.init({ blockId: "48172" });
         let coinCount = 0.00;
         let userWallet = 0; 
         let escrowBalance = 0;
@@ -232,115 +245,9 @@
         function renderProvidersGrid(providers) {
             const container = document.getElementById('providers-container');
             if (!providers || providers.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #8f94a6;">No active providers online right now.</p>';
+                container.innerHTML = `<p style="text-align: center; color: #8f94a6;">No providers online at this moment.</p>`;
                 return;
             }
-
-            container.innerHTML = providers.map(p => `
-                <div class="profile-box">
-                    <h4 style="margin: 5px 0; color: #ff007f;">${p.username}</h4>
-                    <p style="font-size: 12px; color: #8f94a6;">Rate: ${p.profilePrice} Stars • Verified Active</p>
-                    <a href="https://t.me/${p.username}" target="_blank" class="btn-chat">💬 Chat on Telegram</a>
-                    <button class="btn-action" onclick="lockEscrowForBooking(${p.profilePrice})">🔒 Book Escrow (${p.profilePrice} Stars)</button>
-                </div>
-            `).join('');
-        }
-
-        async function initializeStarsDeposit(amount) {
-            try {
-                const res = await fetch('/api/wallet/deposit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegramId: tgUser.id, amount })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    userWallet = data.data.walletStars;
-                    document.getElementById('wallet-display').innerText = userWallet + " Stars";
-                    alert(`Successfully added ${amount} Stars to your account!`);
-                }
-            } catch (e) {
-                alert("Deposit transaction failed.");
-            }
-        }
-
-        async function lockEscrowForBooking(cost) {
-            if (userWallet < cost) {
-                alert("Insufficient Stars balance! Top up your wallet in the Profile tab.");
-                return;
-            }
-            try {
-                const res = await fetch('/api/escrow/book', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegramId: tgUser.id, cost })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    userWallet = data.data.walletStars;
-                    escrowBalance = data.data.escrowStars;
-                    document.getElementById('wallet-display').innerText = userWallet + " Stars";
-                    document.getElementById('escrow-display').innerText = escrowBalance + " Stars";
-                    alert("Funds locked safely in Escrow! Communicate with the provider to fulfill the booking.");
-                }
-            } catch (e) {
-                alert("Escrow booking failed.");
-            }
-        }
-
-        function triggerAdBeforeMining() {
-            if (isMining) return;
-            if (AdController) {
-                AdController.show().then(() => startMiningSession()).catch(() => startMiningSession());
-            } else {
-                startMiningSession();
-            }
-        }
-
-        function showRewardAd() {
-            if (AdController) {
-                AdController.show().then(() => alert("Ad watched! Revenue logged.")).catch(() => alert("Ad closed."));
-            } else {
-                alert("Ad network initialization in progress.");
-            }
-        }
-
-        function startMiningSession() {
-            if (isMining) return;
-            isMining = true;
-            document.getElementById('status-text').innerText = "Status: 🟢 Mining Active...";
-            const mineBtn = document.getElementById('mine-button');
-            mineBtn.disabled = true;
-            mineBtn.innerText = "⛏️ MINING IN PROGRESS...";
-
-            miningInterval = setInterval(() => {
-                coinCount += 0.04;
-                document.getElementById('coin-display').innerText = coinCount.toFixed(2) + " $PSC";
-            }, 1000);
-
-            setTimeout(async () => {
-                clearInterval(miningInterval);
-                isMining = false;
-                document.getElementById('status-text').innerText = "Status: 🔴 Fuel Empty (Tap to resume)";
-                mineBtn.disabled = false;
-                mineBtn.innerText = "🔋 START MINING (8h Active)";
+            container.innerHTML = "";
+            providers.forEach(girl => {
                 
-                await fetch('/api/user/sync', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegramId: tgUser.id, username: tgUser.username, coinBalance: coinCount })
-                });
-            }, 15000);
-        }
-
-        function switchView(viewId, element) {
-            document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            element.classList.add('active');
-        }
-
-        window.onload = syncAndLoadApp;
-    </script>
-</body>
-</html>
