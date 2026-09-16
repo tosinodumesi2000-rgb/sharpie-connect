@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sharpie Connect</title>
     <!-- Official Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://telegram.org"></script>
+    <!-- 💵 OFFICIAL ADSGRAM NETWORK FEED INTEGRATION SCRIPT -->
+    <script src="https://adsgram.ai"></script>
     <style>
         body {
             margin: 0;
@@ -16,28 +18,6 @@
             overflow-x: hidden;
             -webkit-user-select: none;
             user-select: none;
-        }
-        #splash-ad {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #050508;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .ad-timer {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 14px;
         }
         .app-container {
             padding: 20px;
@@ -99,18 +79,22 @@
         }
         .btn-confirm { background: #00e676; color: black; }
         .btn-cancel { background: #ff1744; color: white; }
+        
         .banner-ad-container {
             background-color: #1a1c24;
             border: 1px dashed #3a3f58;
-            height: 50px;
+            height: 65px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             font-size: 12px;
             color: #7a7f9d;
             margin-bottom: 20px;
             border-radius: 8px;
+            cursor: pointer;
         }
+        
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -140,12 +124,6 @@
 </head>
 <body>
 
-    <div id="splash-ad">
-        <div class="ad-timer" id="timer-text">Ad closing in 3s...</div>
-        <h3 style="color: #ff007f;">🔥 SPONSOR FEATURE</h3>
-        <p style="color: #8f94a6; text-align: center; padding: 0 20px;">Premium Crypto Exchange & Token Drops Launching Globally!</p>
-    </div>
-
     <div class="app-container">
         <h2>Sharpie Connect</h2>
         <p style="color: #8f94a6; margin-bottom: 25px;">Global Matchmaking & Rewards Hub</p>
@@ -174,7 +152,7 @@
                 <h3>⚡ Pornstar Coin Mining Hub</h3>
                 <div class="coin-counter" id="coin-display">0.00 $PSC</div>
                 <div style="font-size: 14px; color: #8f94a6; margin-bottom: 15px;" id="status-text">Status: 🔴 Offline (Tap button to start)</div>
-                <button class="btn-action" id="mine-button" onclick="startMiningSession()">🔋 START MINING (8h Active)</button>
+                <button class="btn-action" id="mine-button" onclick="triggerAdBeforeMining()">🔋 START MINING (8h Active)</button>
             </div>
         </div>
 
@@ -188,8 +166,10 @@
             </div>
         </div>
 
-        <div class="banner-ad-container">
-            [ Sponsored Crypto Banner Ad Display Container Area ]
+        <!-- 💵 DYNAMIC TEST AD POPULATION BOX -->
+        <div class="banner-ad-container" onclick="showRewardAd()">
+            <span style="color: #ff007f; font-weight: bold;">📺 WATCH VIDEO SPONSOR</span>
+            <span style="font-size: 10px; color: #8f94a6;">Tap to generate test ad revenue</span>
         </div>
     </div>
 
@@ -200,11 +180,13 @@
     </nav>
 
     <script>
-        // Initialize Telegram WebApp SDK safely
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
         }
+
+        // Connect Adsgram using your exact Unit ID code 48172
+        const AdController = window.Adsgram.init({ blockId: "48172" });
 
         let coinCount = 0.00;
         let userWallet = 1000; 
@@ -213,25 +195,32 @@
         let miningInterval;
         let activeBookingType = "";
 
+        // Trigger full screen ads when mining button is clicked
+        function triggerAdBeforeMining() {
+            AdController.show().then((result) => {
+                // Ad completed successfully -> user is rewarded with mining fuel!
+                startMiningSession();
+            }).catch((result) => {
+                // If ad fails or skipped in test mode, fall back to open mining safely
+                startMiningSession();
+            });
+        }
+
+        // Manual ad watch trigger button logic loop
+        function showRewardAd() {
+            AdController.show().then((result) => {
+                alert("Thank you for watching! Test ad impression logged successfully.");
+            }).catch((err) => {
+                alert("Ad playback complete or skipped.");
+            });
+        }
+
         function switchView(viewId, element) {
             document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
             element.classList.add('active');
         }
-
-        // Dismiss splash ad automatically after countdown
-        let timeLeft = 3;
-        const countdown = setInterval(() => {
-            timeLeft--;
-            const timerElement = document.getElementById('timer-text');
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
-                document.getElementById('splash-ad').style.display = 'none';
-            } else if (timerElement) {
-                timerElement.innerText = `Ad closing in ${timeLeft}s...`;
-            }
-        }, 1000);
 
         function startMiningSession() {
             if (isMining) return;
@@ -252,7 +241,7 @@
                 document.getElementById('status-text').innerText = "Status: 🔴 Fuel Empty (Tap to resume)";
                 mineBtn.disabled = false;
                 mineBtn.innerText = "🔋 START MINING (8h Active)";
-                alert("Your 8-hour session ended! Tap again to continue mining.");
+                alert("Your mining session ended! Watch an ad and tap again to keep earning.");
             }, 15000); 
         }
 
@@ -261,45 +250,6 @@
                 alert("Insufficient Stars balance inside your account dashboard!");
                 return;
             }
-
-            userWallet -= cost;
-            escrowBalance += cost;
             activeBookingType = type;
-
-            document.getElementById('wallet-display').innerText = userWallet + " Stars";
-            document.getElementById('escrow-display').innerText = escrowBalance + " Stars";
-
-            const escrowBox = document.getElementById('escrow-state-box');
-            escrowBox.innerHTML = `
-                <div class="escrow-status-tag">🔒 ESCROW ACTIVE: ${cost} STARS LOCKED</div>
-                <p style="font-size: 12px; color: #8f94a6;">Booking: <b>${type}</b></p>
-                <div class="escrow-actions">
-                    <button class="btn-action btn-confirm" onclick="resolveBooking(true, ${cost})">Release Funds</button>
-                    <button class="btn-action btn-cancel" onclick="resolveBooking(false, ${cost})">Cancel & Refund</button>
-                </div>
-            `;
-        }
-
-        function resolveBooking(completed, amount) {
-            if (completed) {
-                escrowBalance -= amount;
-                alert(`Transaction completed! ${amount} Stars released to provider.`);
-            } else {
-                userWallet += amount;
-                escrowBalance -= amount;
-                alert(`Booking cancelled! ${amount} Stars refunded to your wallet.`);
-            }
-
-            document.getElementById('wallet-display').innerText = userWallet + " Stars";
-            document.getElementById('escrow-display').innerText = escrowBalance + " Stars";
-
-            const escrowBox = document.getElementById('escrow-state-box');
-            escrowBox.innerHTML = `
-                <button class="btn-action" onclick="simulateBooking('Physical Meetup', 500)">🔒 BOOK PHYSICAL MEETUP (500 Stars)</button>
-                <button class="btn-action" style="background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);" onclick="simulateBooking('Sex Video Chat (SVC)', 300)">📱 BOOK SECURE VIDEO CALL (300 Stars)</button>
-            `;
-        }
-    </script>
-</body>
-</html>
-
+            userWallet -= cost;
+        
