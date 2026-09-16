@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sharpie Connect</title>
     <!-- Official Telegram WebApp SDK -->
-    <script src="https://telegram.org"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- 💵 OFFICIAL ADSGRAM NETWORK FEED INTEGRATION SCRIPT -->
-    <script src="https://adsgram.ai"></script>
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -185,8 +185,8 @@
             window.Telegram.WebApp.expand();
         }
 
-        // Connect Adsgram using your exact Unit ID code 48172
-        const AdController = window.Adsgram.init({ blockId: "48172" });
+        // Initialize Adsgram using Unit ID 48172 safely
+        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "48172" }) : null;
 
         let coinCount = 0.00;
         let userWallet = 1000; 
@@ -197,22 +197,30 @@
 
         // Trigger full screen ads when mining button is clicked
         function triggerAdBeforeMining() {
-            AdController.show().then((result) => {
-                // Ad completed successfully -> user is rewarded with mining fuel!
+            if (isMining) return;
+            if (AdController) {
+                AdController.show().then((result) => {
+                    startMiningSession();
+                }).catch((result) => {
+                    // Fallback to start mining if ad fails or skips
+                    startMiningSession();
+                });
+            } else {
                 startMiningSession();
-            }).catch((result) => {
-                // If ad fails or skipped in test mode, fall back to open mining safely
-                startMiningSession();
-            });
+            }
         }
 
         // Manual ad watch trigger button logic loop
         function showRewardAd() {
-            AdController.show().then((result) => {
-                alert("Thank you for watching! Test ad impression logged successfully.");
-            }).catch((err) => {
-                alert("Ad playback complete or skipped.");
-            });
+            if (AdController) {
+                AdController.show().then((result) => {
+                    alert("Thank you for watching! Test ad impression logged successfully.");
+                }).catch((err) => {
+                    alert("Ad playback complete or skipped.");
+                });
+            } else {
+                alert("Adsgram SDK is loading. Please try again in a moment.");
+            }
         }
 
         function switchView(viewId, element) {
@@ -252,4 +260,42 @@
             }
             activeBookingType = type;
             userWallet -= cost;
-        
+            escrowBalance += cost;
+
+            document.getElementById('wallet-display').innerText = userWallet + " Stars";
+            document.getElementById('escrow-display').innerText = escrowBalance + " Stars";
+
+            const escrowBox = document.getElementById('escrow-state-box');
+            escrowBox.innerHTML = `
+                <div class="escrow-status-tag">🔒 ESCROW ACTIVE: ${cost} STARS LOCKED</div>
+                <p style="font-size: 12px; color: #8f94a6;">Booking: <b>${type}</b></p>
+                <div class="escrow-actions">
+                    <button class="btn-action btn-confirm" onclick="resolveBooking(true, ${cost})">Release Funds</button>
+                    <button class="btn-action btn-cancel" onclick="resolveBooking(false, ${cost})">Cancel & Refund</button>
+                </div>
+            `;
+        }
+
+        function resolveBooking(completed, amount) {
+            if (completed) {
+                escrowBalance -= amount;
+                alert(`Transaction completed! ${amount} Stars released to provider.`);
+            } else {
+                userWallet += amount;
+                escrowBalance -= amount;
+                alert(`Booking cancelled! ${amount} Stars refunded to your wallet.`);
+            }
+
+            document.getElementById('wallet-display').innerText = userWallet + " Stars";
+            document.getElementById('escrow-display').innerText = escrowBalance + " Stars";
+
+            const escrowBox = document.getElementById('escrow-state-box');
+            escrowBox.innerHTML = `
+                <button class="btn-action" onclick="simulateBooking('Physical Meetup', 500)">🔒 BOOK PHYSICAL MEETUP (500 Stars)</button>
+                <button class="btn-action" style="background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);" onclick="simulateBooking('Sex Video Chat (SVC)', 300)">📱 BOOK SECURE VIDEO CALL (300 Stars)</button>
+            `;
+        }
+    </script>
+</body>
+</html>
+
