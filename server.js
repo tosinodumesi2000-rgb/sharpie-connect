@@ -2,131 +2,93 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-
 const app = express();
+
 app.use(express.json());
 app.use(cors());
-
 app.use(express.static(path.join(__dirname, '/')));
 
-// Database Pipeline Configuration
 const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/sharpie_connect";
-mongoose.connect(mongoURI)
-    .then(() => console.log("🔒 Secured MongoDB Atlas Cluster Engaged!"))
-    .catch(err => console.error("❌ Link connection error:", err));
+mongoose.connect(mongoURI).then(()=>console.log("DB Connected")).catch(err=>console.error(err));
 
-// Complete Account Profile Data Schema Ledger
 const UserSchema = new mongoose.Schema({
-    telegramId: { type: String, required: true, unique: true },
-    username: String,
-    coinBalance: { type: Number, default: 0.00 },
-    walletStars: { type: Number, default: 0 },
-    escrowStars: { type: Number, default: 0 },
-    isProvider: { type: Boolean, default: false },
-    profilePrice: { type: Number, default: 300 }
-});
-const User = mongoose.model('User', UserSchema);
-
-// SEED DATA GENERATOR PIPELINE
-async function seedProviderGridData() {
-    try {
-        const count = await User.countDocuments({ isProvider: true });
-        if (count === 0) {
-            await User.create([
-                { telegramId: "prov_1", username: "Jessica_Connect", walletStars: 0, escrowStars: 0, isProvider: true, profilePrice: 300 },
-                { telegramId: "prov_2", username: "Blessing_LagosHub", walletStars: 0, escrowStars: 0, isProvider: true, profilePrice: 400 },
-                { telegramId: "prov_3", username: "Chioma_AbujaX", walletStars: 0, escrowStars: 0, isProvider: true, profilePrice: 500 }
-            ]);
-            console.log("💎 Operational Match Grid seeded successfully into cloud folders!");
-        }
-    } catch(e) { console.log(e); }
-}
-seedProviderGridData();
-
-// 1. Sync or Create User Metric Profiles
-app.post('/api/user/sync', async (req, res) => {
-    const { telegramId, username, coinBalance } = req.body;
-    try {
-        let user = await User.findOne({ telegramId });
-        if (!user) {
-            user = new User({ telegramId, username });
-            await user.save();
-        } else if (coinBalance !== undefined) {
-            user.coinBalance = coinBalance;
-            await user.save();
-        }
-        res.json({ success: true, data: user });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
+  telegramId:{type:String,unique:true},
+  username:String,
+  role:{type:String,enum:['user','provider','admin'],default:'user'},
+  providerType:{type:String,enum:['hookup','svc','both']},
+  coinBalance:{type:Number,default:0},
+  walletStars:{type:Number,default:1000},
+  escrowStars:{type:Number,default:0},
+  verificationStatus:{type:String,enum:['none','pending','approved','rejected'],default:'none'},
+  verificationVideoUrl:String,
+  profilePhotos:[String],
+  bio:String,
+  location:String,
+  isVerifiedProvider:{type:Boolean,default:false},
+  priceMeetup:{type:Number,default:500},
+  priceVideo:{type:Number,default:300},
+  lastMiningTime:{type:Date,default:null}
 });
 
-// 2. Fetch Active Providers Scrolling List Grid
-app.get('/api/providers/list', async (req, res) => {
-    try {
-        const list = await User.find({ isProvider: true });
-        res.json({ success: true, data: list });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
+const User = mongoose.model('User',UserSchema);
+
+app.post('/api/user/sync', async (req,res)=>{
+  const {telegramId,username}=req.body;
+  let user = await User.findOne({telegramId});
+  if(!user){user=new User({telegramId,username}); await user.save();}
+  res.json({success:true,data:[STRIPPED]
 });
 
-// 3. Deposit Stars to User Balance
-app.post('/api/wallet/deposit', async (req, res) => {
-    const { telegramId, amount } = req.body;
-    try {
-        let user = await User.findOne({ telegramId });
-        if (!user) return res.status(404).json({ success: false, message: "Account profile missing." });
-        
-        user.walletStars += amount;
-        await user.save();
-        
-        res.json({ success: true, data: user });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
+app.post('/api/mine/start', async (req,res)=>{
+  const {telegramId}=req.body;
+  let user = await User.findOne({telegramId});
+  if(!user) return res.status(400).json({success:false});
+  user.coinBalance+=10;
+  user.lastMiningTime=new Date();
+  await user.save();
+  res.json({success:true,coinBalance:user.coinBalance});
 });
 
-// 4. Engage Anti-Scam Protection Escrow Funds Vault Lock
-app.post('/api/escrow/book', async (req, res) => {
-    const { telegramId, cost } = req.body;
-    try {
-        let user = await User.findOne({ telegramId });
-        if (!user || user.walletStars < cost) {
-            return res.status(400).json({ success: false, message: "Insufficient wallet deposit balance parameters." });
-        }
-        
-        user.walletStars -= cost;
-        user.escrowStars += cost;
-        await user.save();
-        
-        res.json({ success: true, data: user });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
+app.post('/api/escrow/book', async (req,res)=>{
+  const {telegramId,bookingType,cost}=req.body;
+  let user = await User.findOne({telegramId});
+  if(!user || user.walletStars<cost) return res.status(400).json({success:false,message:"Not enough Stars"});
+  user.walletStars-=cost;
+  user.escrowStars+=cost;
+  await user.save();
+  res.json({success:true,message:bookingType+" booked! "+cost+" Stars locked in escrow"});
 });
 
-// 5. Release or Refund Escrow States
-app.post('/api/escrow/resolve', async (req, res) => {
-    const { telegramId, action, cost } = req.body;
-    try {
-        let user = await User.findOne({ telegramId });
-        if (!user || user.escrowStars < cost) {
-            return res.status(400).json({ success: false, message: "No active escrow transaction found." });
-        }
-        
-        user.escrowStars -= cost;
-        if (action === 'refund') {
-            user.walletStars += cost;
-        }
-        await user.save();
-        
-        res.json({ success: true, data: user });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
+app.post('/api/verify/upload', async (req,res)=>{
+  const {telegramId,videoUrl}=req.body;
+  await User.findOneAndUpdate({telegramId},{verificationVideoUrl:videoUrl,verificationStatus:'pending'});
+  res.json({success:true,message:"Video sent to admin"});
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Sharpie Connect Engine listening on network port ${PORT}`));
-           
+app.get('/api/providers/list', async (req,res)=>{
+  const providers = await User.find({role:'provider',verificationStatus:'approved'});
+  res.json(providers);
+});
+
+app.get('/api/admin/pending', async (req,res)=>{
+  const pending = await User.find({verificationStatus:'pending'});
+  res.json(pending);
+});
+
+app.post('/api/admin/approve', async (req,res)=>{
+  const {targetId,approve}=req.body;
+  const status = approve?'approved':'rejected';
+  await User.findOneAndUpdate({telegramId:targetId},{verificationStatus:status,isVerifiedProvider:approve?true:false});
+  res.json({success:true});
+});
+
+app.post('/api/provider/signup', async (req,res)=>{
+  const {telegramId,providerType,bio,location,priceMeetup,priceVideo,photos}=req.body;
+  await User.findOneAndUpdate({telegramId},{role:'provider',providerType,bio,location,priceMeetup,priceVideo,profilePhotos:photos});
+  res.json({success:true,message:"Provider profile created"});
+});
+
+app.get('/api/adsgram/reward',(req,res)=>{res.send("OK");});
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT,()=>console.log("Running on "+PORT));
