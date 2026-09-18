@@ -1,253 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sharpie Connect</title>
-    <!-- Official Telegram WebApp SDK -->
-    <script src="https://telegram.org"></script>
-    <!-- ADSGRAM INTEGRATION -->
-    <script src="https://adsgram.ai"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #0f111a;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow-x: hidden;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        .app-container {
-            padding: 20px;
-            padding-bottom: 90px;
-        }
-        .app-view { display: none; }
-        .app-view.active { display: block; }
-        .dashboard-card {
-            background: linear-gradient(135deg, #1e1e2f 0%, #252538 100%);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-        }
-        .coin-counter, .wallet-balance {
-            font-size: 32px;
-            font-weight: bold;
-            color: #ffcc00;
-            margin: 15px 0;
-        }
-        .btn-action {
-            background: linear-gradient(90deg, #ff007f 0%, #7f00ff 100%);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            font-size: 14px;
-            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
-            margin-top: 10px;
-        }
-        .btn-chat {
-            background: #0088cc;
-            color: white;
-            margin-top: 5px;
-        }
-        .btn-action:disabled {
-            background: #2e3040;
-            color: #5a5d7a;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        .profile-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 15px;
-        }
-        .profile-box {
-            border: 1px solid #3a3f58;
-            border-radius: 12px;
-            padding: 15px;
-            background: rgba(0,0,0,0.2);
-            text-align: left;
-        }
-        .escrow-status-tag {
-            background: #ffcc00;
-            color: #000;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 10px;
-            text-align: center;
-            width: 90%;
-        }
-        .escrow-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .btn-confirm { background: #00e676; color: black; }
-        .btn-cancel { background: #ff1744; color: white; }
-        
-        .banner-ad-container {
-            background-color: #1a1c24;
-            border: 1px dashed #3a3f58;
-            height: 65px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
-            color: #7a7f9d;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #161824;
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            border-top: 1px solid #23263a;
-            z-index: 1000;
-        }
-        .nav-item {
-            color: #8f94a6;
-            text-decoration: none;
-            font-size: 12px;
-            text-align: center;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-        .nav-item.active {
-            color: #ff007f;
-            font-weight: bold;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sharpie Connect - 18+ Dating & Mining</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+<style>
+body{margin:0;background:#0f111a;color:#fff;font-family:Arial;padding:20px;padding-bottom:100px}
+.card{background:#1e1e2f;border-radius:16px;padding:20px;margin-bottom:20px;text-align:center}
+.btn{width:100%;padding:14px;border-radius:25px;border:none;font-weight:bold;color:#fff;background:linear-gradient(90deg,#ff007f,#7f00ff);margin-top:10px}
+.balance{font-size:32px;color:#ffcc00;font-weight:bold}
+.tab{position:fixed;bottom:0;left:0;right:0;background:#1a1a2e;display:flex;justify-content:space-around;padding:12px}
+.tab button{background:none;border:none;color:#fff;font-size:14px}
+.view{display:none}.view.active{display:block}
+</style>
 </head>
 <body>
+<div id="discover" class="view active">
+  <div class="card"><h2>Sharpie Connect</h2><p>18+ Only • Consensual Dating & Video Chat</p><p>Anti-Scam Escrow Protected</p></div>
+  <div class="card" id="profile-list">Loading verified profiles...</div>
+  <div class="card">
+    <h3>Book Secure Session</h3>
+    <button class="btn" onclick="book('meetup',500)">BOOK MEETUP - 500 Stars (Escrow)</button>
+    <button class="btn" style="background:linear-gradient(90deg,#00c6ff,#0072ff)" onclick="book('video',300)">BOOK VIDEO CALL - 300 Stars (Escrow)</button>
+  </div>
+</div>
+<div id="mine" class="view">
+  <div class="card">
+    <h3>⚡ $SPC Mining Hub</h3>
+    <div class="balance" id="coin">0.00 $SPC</div>
+    <p id="mine-status">Offline</p>
+    <button class="btn" onclick="doMine()">🔋 START MINING + Watch Ad</button>
+    <p style="font-size:12px;color:#aaa;margin-top:10px">Watch a Reward ad to earn. 1 ad = 10 $SPC</p>
+  </div>
+</div>
+<div id="wallet" class="view">
+  <div class="card"><h3>Wallet</h3><div class="balance" id="stars">1000 Stars</div><p>Escrow Locked: <span id="escrow">0</span> Stars</p></div>
+</div>
+<div class="tab">
+  <button onclick="openTab('discover')">Discover</button>
+  <button onclick="openTab('mine')">⚡ Mine</button>
+  <button onclick="openTab('wallet')">Wallet</button>
+</div>
+<div id="ad-banner" style="margin-top:20px"></div>
+<script>
+const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
+const API = "https://sharpie-connect.onrender.com"; // we will create this in Step 3
+let AdController;
+try{ AdController = window.Adsgram.init({blockId:"48172"}); }catch(e){}
 
-    <div class="app-container">
-        <h2>Sharpie Connect</h2>
-        <p style="color: #8f94a6; margin-bottom: 25px;">Global Matchmaking & Rewards Hub</p>
+function openTab(name){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(name).classList.add('active');}
 
-        <!-- VIEW A: DISCOVER LIVE PROVIDERS GRID -->
-        <div id="view-discover" class="app-view active">
-            <div class="dashboard-card">
-                <h3>👥 Active Escrow Protection Grid</h3>
-                <p style="color: #8f94a6; font-size: 13px;">Funds are 100% safely held by the app escrow system. Tap chat to negotiate first, then lock stars to secure the link!</p>
-                <div class="profile-grid" id="providers-container">
-                    <p style="text-align: center; color: #8f94a6;">Loading active profiles from database...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- VIEW B: MINING ENGINE -->
-        <div id="view-mine" class="app-view">
-            <div class="dashboard-card">
-                <h3>⚡ Pornstar Coin Mining Hub</h3>
-                <div class="coin-counter" id="coin-display">0.00 $PSC</div>
-                <div style="font-size: 14px; color: #8f94a6; margin-bottom: 15px;" id="status-text">Status: 🔴 Offline (Tap button to start)</div>
-                <button class="btn-action" id="mine-button" onclick="triggerAdBeforeMining()">🔋 START MINING (8h Active)</button>
-            </div>
-        </div>
-
-        <!-- VIEW C: PROFILE & NATIVE WALLET TOP-UP -->
-        <div id="view-profile" class="app-view">
-            <div class="dashboard-card">
-                <h3>👤 Wallet & Payout Dashboard</h3>
-                <p style="color: #8f94a6; margin-bottom: 5px;">Your Available Stars Balance</p>
-                <div class="wallet-balance" id="wallet-display">0 Stars</div>
-                <p style="font-size: 12px; color: #8f94a6;">Locked in Secure Escrow: <span id="escrow-display" style="color: #ffcc00; font-weight: bold;">0 Stars</span></p>
-                
-                <div style="border-top: 1px solid #23263a; margin-top: 20px; padding-top: 15px;">
-                    <h4>💳 Sandbox Deposit Interface</h4>
-                    <p style="font-size: 12px; color: #8f94a6; margin-bottom: 15px;">Testing instant wallet crediting without API breakdown triggers.</p>
-                    <button class="btn-action" style="background: #ffcc00; color: #000;" onclick="initializeStarsDeposit(250)">➕ CREDIT 250 STARS (TEST)</button>
-                    <button class="btn-action" style="background: #ffcc00; color: #000;" onclick="initializeStarsDeposit(500)">➕ CREDIT 500 STARS (TEST)</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ADSGRAM LAYOUT -->
-        <div class="banner-ad-container" onclick="showRewardAd()">
-            <span style="color: #ff007f; font-weight: bold;">📺 WATCH VIDEO SPONSOR</span>
-            <span style="font-size: 10px; color: #8f94a6;">Tap to generate ad revenue</span>
-        </div>
-    </div>
-
-    <nav class="nav-bar">
-        <button class="nav-item active" onclick="switchView('view-discover', this)">👥 Discover</button>
-        <button class="nav-item" onclick="switchView('view-mine', this)">⚡ Mine</button>
-        <button class="nav-item" onclick="switchView('view-profile', this)">👤 Profile</button>
-    </nav>
-
-    <script>
-        let tgUser = { id: "guest_user", username: "Guest" };
-        
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-            if (window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-                tgUser.id = window.Telegram.WebApp.initDataUnsafe.user.id.toString();
-                tgUser.username = window.Telegram.WebApp.initDataUnsafe.user.username || "TelegramUser";
-            }
-        }
-
-        const AdController = window.Adsgram.init({ blockId: "48172" });
-        let coinCount = 0.00;
-        let userWallet = 0; 
-        let escrowBalance = 0;
-        let isMining = false;
-        let miningInterval;
-
-        async function syncAndLoadApp() {
-            try {
-                const res = await fetch('/api/user/sync', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegramId: tgUser.id, username: tgUser.username })
-                });
-                const userResult = await res.json();
-                if (userResult.success && userResult.data) {
-                    coinCount = userResult.data.coinBalance;
-                    userWallet = userResult.data.walletStars;
-                    escrowBalance = userResult.data.escrowStars;
-                    
-                    document.getElementById('coin-display').innerText = coinCount.toFixed(2) + " $PSC";
-                    document.getElementById('wallet-display').innerText = userWallet + " Stars";
-                    document.getElementById('escrow-display').innerText = escrowBalance + " Stars";
-                }
-
-                const gridRes = await fetch('/api/providers/list');
-                const gridData = await gridRes.json();
-                if (gridData.success) {
-                    renderProvidersGrid(gridData.data);
-                }
-            } catch (err) {
-                console.log("Error loading platform data pipelines.");
-            }
-        }
-
-        function renderProvidersGrid(providers) {
-            const container = document.getElementById('providers-container');
-            if (!providers || providers.length === 0) {
-                container.innerHTML = `<p style="text-align: center; color: #8f94a6;">No providers online at this moment.</p>`;
-                return;
-            }
-            container.innerHTML = "";
-            providers.forEach(girl => {
-                
+async function syncUser(){
+  const user = tg.initDataUnsafe.user;
+  let res = await fetch(API+"/api/user/sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({telegramId:String(user.id),username:user.username})});
+  let data = await res.json();
+  if(data.success){document.getElementById('stars').innerText=data.data.walletStars+" Stars";document.getElementById('escrow').innerText=data.data.escrowStars+" Stars";document.getElementById('coin').innerText=data.data.coinBalance+" $SPC";}
+}
+async function doMine(){
+  if(AdController){ await AdController.show().catch(()=>{}); }
+  let res = await fetch(API+"/api/mine/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({telegramId:String(tg.initDataUnsafe.user.id)})});
+  let data = await res.json();
+  document.getElementById('coin').innerText = data.coinBalance+" $SPC";
+  document.getElementById('mine-status').innerText = "Active - 8h";
+  tg.showPopup({message:"You earned 10 $SPC!"});
+}
+async function book(type,cost){
+  if(AdController){ await AdController.show().catch(()=>{}); }
+  let res = await fetch(API+"/api/escrow/book",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({telegramId:String(tg.initDataUnsafe.user.id),bookingType:type,cost:cost})});
+  let data = await res.json();
+  tg.showPopup({message:data.message});
+  syncUser();
+}
+syncUser();
+</script>
+</body>
+</html>
